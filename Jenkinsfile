@@ -31,6 +31,7 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''echo "Test stage is in progress"
+                ls -la
                 npm run test
                 if [ -f "$INDEX_FILE_PATH" ]; then
                     echo "$INDEX_FILE_PATH exists"
