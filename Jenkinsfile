@@ -46,9 +46,9 @@ pipeline {
             }
         }
     }
-    // post {
-    //     success{
-    //         archiveArtifacts artifacts: '**/*.jar', fingerprint: true
-    //     }
-    // }
+    post {
+        always{
+            junit '**/test-results/**/*.xml'
+        }
+    }
 }
