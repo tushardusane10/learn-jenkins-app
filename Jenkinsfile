@@ -16,8 +16,7 @@ pipeline {
             }
             steps {
                 sh '''
-                echo "Insalled docker"
-                docker --version
+                echo "Installed docker"
                 node --version
                 npm --version
                 '''
