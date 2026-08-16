@@ -3,6 +3,7 @@ pipeline {
     stages {
         stage('Clean Up') {
             steps {
+                sh '''echo "Cleaning up workspace"'''
                 cleanWs()
             }
         }
@@ -14,7 +15,12 @@ pipeline {
                 }
             }
             steps {
-                
+                sh '''
+                echo "Insalled docker"
+                docker --version
+                node --version
+                npm --version
+                '''
             }
         }
     }
