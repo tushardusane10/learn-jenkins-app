@@ -9,6 +9,26 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Test') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
+                }
+            }
+            environment {
+                CI = 'true'
+                INDEX_FILE_PATH = 'build/index.html'
+            }
+            steps {
+                sh '''
+                echo "Test stage is in progress"
+                npm ci
+                npm test
+                test -f "$INDEX_FILE_PATH"
+                '''
+            }
+        }
         stage('Build') {
             agent{
                 docker{
@@ -26,25 +46,7 @@ pipeline {
                 '''
             }
         }
-        stage('Test') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                    reuseNode true
-                }
-            }
-            environment {
-                CI = 'true'
-                INDEX_FILE_PATH = 'build/index.html'
-            }
-            steps {
-                sh '''
-                echo "Test stage is in progress"
-                test -f "$INDEX_FILE_PATH"
-                npm test
-                '''
-            }
-        }
+        
     }
     post {
         always{
