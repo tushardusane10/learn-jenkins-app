@@ -5,6 +5,7 @@ pipeline {
             steps {
                 sh '''echo "Cleaning up workspace"'''
                 cleanWs()
+                checkout scm
             }
         }
         stage('Build') {
