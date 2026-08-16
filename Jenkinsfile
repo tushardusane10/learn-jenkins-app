@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        INDEX_FILE_PATH = 'build/index.html'
+    }
     stages {
         stage('Clean Up') {
             steps {
@@ -29,6 +32,12 @@ pipeline {
             steps {
                 sh '''echo "Test stage is in progress"
                 npm run test
+                if [ -f "$INDEX_FILE_PATH" ]; then
+                    echo "$INDEX_FILE_PATH exists"
+                else
+                    echo "$INDEX_FILE_PATH does not exist"
+                    exit 1
+                fi
                 '''
             }
         }
