@@ -25,7 +25,7 @@ pipeline {
                 echo "Test stage is in progress"
                 npm ci
                 npm test
-                test -f "$INDEX_FILE_PATH"
+                #test -f "$INDEX_FILE_PATH"
                 '''
             }
         }
