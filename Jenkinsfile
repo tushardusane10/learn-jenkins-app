@@ -25,7 +25,25 @@ pipeline {
                 echo "Test stage is in progress"
                 npm ci
                 npm test
-                #test -f "$INDEX_FILE_PATH"
+                '''
+            }
+        }
+        stage('E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                    reuseNode true
+                }
+            }
+            environment {
+                CI = 'true'
+                
+            }
+            steps {
+                sh '''
+                echo "Playwright test stage is in progress"
+                npm install -g serve
+                serve -s build
                 '''
             }
         }
