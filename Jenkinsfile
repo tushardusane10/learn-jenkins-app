@@ -9,50 +9,42 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Testing'){
-            parallel {
-                    stage('Unit Testing') {
-                        agent {
-                            docker {
-                                image 'node:20-alpine'
-                                reuseNode true
-                            }
-                        }
-                    }
-                    environment {
-                        CI = 'true'
-                    }
-                    steps {
-                        sh '''
-                        echo "Test stage is in progress"
-                        npm ci
-                        npm test
-                        '''
-                    }
-                    post {
-                        always{
-                            junit '**/test-results/**/*.xml'
-                        }
-                    }
+        stage('Test') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
                 }
-                stage('E2E Testing') {
-                    agent {
-                        docker {
-                            image 'mcr.microsoft.com/playwright:v1.62.0-noble'
-                            reuseNode true
-                        }
-                    }
-                    environment {
-                        CI = 'true'
-                    }
-                    steps {
-                        sh '''
-                        echo "Playwright test stage is in progress"
-                        npm install serve
-                        node_modules/serve-index/bin/serve-index.js build
-                        '''
-                    }
+            }
+            environment {
+                CI = 'true'
+                INDEX_FILE_PATH = 'build/index.html'
+            }
+            steps {
+                sh '''
+                echo "Test stage is in progress"
+                npm ci
+                npm test
+                '''
+            }
+        }
+        stage('E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
+                    reuseNode true
                 }
+            }
+            environment {
+                CI = 'true'
+                
+            }
+            steps {
+                sh '''
+                echo "Playwright test stage is in progress"
+                npm install serve
+                node_modules/serve-index/bin/serve-index.js build
+                '''
             }
         }
         stage('Build') {
@@ -73,5 +65,10 @@ pipeline {
             }
         }
         
+    }
+    post {
+        always{
+            junit '**/test-results/**/*.xml'
+        }
     }
 }
