@@ -1,74 +1,76 @@
 pipeline {
     agent any
-
-    stages {
-        stage('Clean Up') {
-            steps {
-                sh '''echo "Cleaning up workspace"'''
-                cleanWs()
-                checkout scm
-            }
-        }
-        stage('Test') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                    reuseNode true
-                }
-            }
-            environment {
-                CI = 'true'
-                INDEX_FILE_PATH = 'build/index.html'
-            }
-            steps {
-                sh '''
-                echo "Test stage is in progress"
-                npm ci
-                npm test
-                '''
-            }
-        }
-        stage('E2E') {
-            agent {
-                docker {
-                    image 'mcr.microsoft.com/playwright:v1.62.0-noble'
-                    reuseNode true
-                }
-            }
-            environment {
-                CI = 'true'
-                
-            }
-            steps {
-                sh '''
-                echo "Playwright test stage is in progress"
-                npm install serve
-                node_modules/serve-index/bin/serve-index.js build
-                '''
-            }
-        }
-        stage('Build') {
-            agent{
-                docker{
-                    image 'node:20-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                echo "Installed docker"
-                node --version
-                npm --version
-                npm ci
-                npm run build
-                '''
-            }
-        }
-        
+    environment{
+        NETLIFY_SITE_ID = 'bc0531b3-f69f-4e70-b958-ff1dfbe111aa'
+        NETLIFY_AUTH_TOKEN = '$jenkins'
     }
-    post {
-        always{
-            junit '**/test-results/**/*.xml'
+    stages {
+        stage("CLear") {
+            steps {
+                sh '''
+                    echo " Stage clear"
+                    echo "$NETLIFY_SITE_ID"
+                    echo "$NETLIFY_AUTH_TOKEN"
+                '''
+                cleanWs()
+            }    
+        }
+        stage("Testng"){
+            parallel {
+                stage("Unit Testing"){
+                    agent {
+                        docker{
+                            image 'node:20-alpine'
+                            reuseNode true
+                        }
+                    }
+                    steps{
+                        sh '''
+                            echo "Unit test in progress"
+                            npm ci
+                            npm run test
+                        '''
+                    }
+                }
+                stage("Playwrite Testing"){
+                    agent {
+                        docker{
+                            image 'mcr.microsoft.com/playwright:v1.55.0-noble'
+                            reuseNode true
+                        }
+                    }
+                    steps{
+                        sh '''
+                            echo "Playwrite test in progress"
+                            npm ci
+                            npx playwright test
+                        '''
+                    }
+                }
+            }
+        }
+        stage("Build") {
+            agent{
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    echo "Unit test in progress"
+                        npm ci
+                        npm run build
+                '''
+            }
+        }
+        stage("Deploy") {
+            
+            steps {
+                sh '''
+                    echo "Deployment is starting"
+                '''
+            }
         }
     }
 }
