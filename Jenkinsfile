@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment{
         NETLIFY_SITE_ID = 'bc0531b3-f69f-4e70-b958-ff1dfbe111aa'
-        NETLIFY_AUTH_TOKEN = '$jenkins'
+        NETLIFY_AUTH_TOKEN = credentials('netlify-secret')
     }
     stages {
         stage("CLear") {
